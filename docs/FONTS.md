@@ -8,7 +8,7 @@ a 13 pixels high, pixel-perfect font used by default. We embed it font in source
 You may also load external .TTF/.OTF files. 
 In the `misc/fonts/` folder you can find a few suggested fonts, provided as a convenience.
 
-**Also read the FAQ:** https://www.dearimgui.org/faq
+**Also read the FAQ:** https://www.dearimgui.org/faq (there is a Fonts section!)
 
 **Please use the Discord server**: http://discord.dearimgui.org and not the Github issue tracker for basic font loading questions.
 
@@ -52,6 +52,12 @@ io.Fonts->AddFontDefault();
 ```
 
 Load .TTF/.OTF file with:
+```cpp
+ImGuiIO& io = ImGui::GetIO();
+io.Fonts->AddFontFromFileTTF("font.ttf", size_pixels);
+```
+
+Load multiple fonts
 ```cpp
 ImGuiIO& io = ImGui::GetIO();
 ImFont* font1 = io.Fonts->AddFontFromFileTTF("font.ttf", size_pixels);
@@ -109,7 +115,7 @@ font->DisplayOffset.y = 1;   // Render 1 pixel down
 Font Atlas too large?
 
 - If you have very large number of glyphs or multiple fonts, the texture may become too big for your graphics API. The typical result of failing to upload a texture is if every glyphs appears as white rectangles.
-- In particular, using a large range such as GetGlyphRangesChineseSimplifiedCommon() is not recommended unless you set OversampleH/OversampleV to 1 and use a small font size.
+- In particular, using a large range such as `GetGlyphRangesChineseSimplifiedCommon()` is not recommended unless you set `OversampleH`/`OversampleV` to 1 and use a small font size.
 - Mind the fact that some graphics drivers have texture size limitation.
 - If you are building a PC application, mind the fact that your users may use hardware with lower limitations than yours.
 
@@ -128,8 +134,7 @@ Some solutions:
 Using an icon font (such as [FontAwesome](http://fontawesome.io) or [OpenFontIcons](https://github.com/traverseda/OpenFontIcons)) is an easy and practical way to use icons in your Dear ImGui application.
 A common pattern is to merge the icon font within your main font, so you can embed icons directly from your strings without having to change fonts back and forth.
 
-To refer to the icon UTF-8 codepoints from your C++ code, you may use those headers files created by Juliette Foucaut: https://github.com/juliettef/IconFontCppHeaders. Those files are full of line such as:
-  `#define ICON_FA_SEARCH  "\xEF\x80\x82"`
+To refer to the icon UTF-8 codepoints from your C++ code, you may use those headers files created by Juliette Foucaut: https://github.com/juliettef/IconFontCppHeaders.
   
 So you can use `ICON_FA_SEARCH` as a string that will render as a "Search" icon.
 
@@ -162,6 +167,7 @@ See Links below for other icons fonts and related tools.
 - Dear ImGui uses imstb\_truetype.h to rasterize fonts (with optional oversampling). This technique and its implementation are not ideal for fonts rendered at small sizes, which may appear a little blurry or hard to read.
 - There is an implementation of the ImFontAtlas builder using FreeType that you can use in the [misc/freetype/](https://github.com/ocornut/imgui/tree/master/misc/freetype) folder.
 - FreeType supports auto-hinting which tends to improve the readability of small fonts.
+- Read documentation in the [misc/freetype/](https://github.com/ocornut/imgui/tree/master/misc/freetype) folder.
 
 Note:
 - This code currently creates textures that are unoptimally too large (could be fixed with some work).
@@ -227,9 +233,9 @@ for (int rect_n = 0; rect_n < IM_ARRAYSIZE(rect_ids); rect_n++)
 ---------------------------------------
  ## Embedding Fonts In Source Code
 
-- Compile and use 'binary\_to\_compressed\_c.cpp' to create a compressed C style array that you can embed in source code.
-- See the documentation in binary\_to\_compressed\_c.cpp for instruction on how to use the tool.
-- You may find a precompiled version binary_to_compressed_c.exe for Windows instead of demo binaries package (see README).
+- Compile and use [binary_to_compressed_c.cpp](https://github.com/ocornut/imgui/blob/master/misc/fonts/binary_to_compressed_c.cpp) to create a compressed C style array that you can embed in source code.
+- See the documentation in [binary_to_compressed_c.cpp](https://github.com/ocornut/imgui/blob/master/misc/fonts/binary_to_compressed_c.cpp) for instruction on how to use the tool.
+- You may find a precompiled version binary_to_compressed_c.exe for Windows instead of demo binaries package (see [README](https://github.com/ocornut/imgui/blob/master/docs/README.md)).
 - The tool can optionally output Base85 encoding to reduce the size of _source code_ but the read-only arrays in the actual binary will be about 20% bigger.
 
 Then load the font with:
