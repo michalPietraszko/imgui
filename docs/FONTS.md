@@ -47,9 +47,10 @@ u8"こんにちは"   // this will be encoded as UTF-8
 
 Load default font:
 ```cpp
-  ImGuiIO& io = ImGui::GetIO();
-  io.Fonts->AddFontDefault();
+ImGuiIO& io = ImGui::GetIO();
+io.Fonts->AddFontDefault();
 ```
+
 Load .TTF/.OTF file with:
 ```cpp
 ImGuiIO& io = ImGui::GetIO();
@@ -62,6 +63,7 @@ ImGui::PushFont(font2);
 ImGui::Text("Hello with another font");
 ImGui::PopFont();
 ```
+
 For advanced options create a ImFontConfig structure and pass it to the AddFont function (it will be copied internally):
 ```cpp
 ImFontConfig config;
@@ -71,7 +73,7 @@ config.GlyphExtraSpacing.x = 1.0f;
 ImFont* font = io.Fonts->AddFontFromFileTTF("font.ttf", size_pixels, &config);
 ```
 
-Combine two fonts into one:
+Combine multiple fonts into one:
 ```cpp
 // Load a first font
 ImFont* font = io.Fonts->AddFontDefault();
@@ -82,8 +84,8 @@ ImFont* font = io.Fonts->AddFontDefault();
 static const ImWchar icons_ranges[] = { 0xf000, 0xf3ff, 0 }; // Will not be copied by AddFont* so keep in scope.
 ImFontConfig config;
 config.MergeMode = true;
-io.Fonts->AddFontFromFileTTF("DroidSans.ttf", 18.0f, &config, io.Fonts->GetGlyphRangesJapanese());
-io.Fonts->AddFontFromFileTTF("fontawesome-webfont.ttf", 18.0f, &config, icons_ranges);
+io.Fonts->AddFontFromFileTTF("DroidSans.ttf", 18.0f, &config, io.Fonts->GetGlyphRangesJapanese()); // Merge into first font
+io.Fonts->AddFontFromFileTTF("fontawesome-webfont.ttf", 18.0f, &config, icons_ranges);             // Merge into first font
 io.Fonts->Build();
 ```
 Add a fourth parameter to bake specific font ranges only:
@@ -123,39 +125,34 @@ Some solutions:
 ---------------------------------------
  ## Using Icons
 
-- Using an icon font (such as [FontAwesome](http://fontawesome.io) or [OpenFontIcons](https://github.com/traverseda/OpenFontIcons)) is an easy and practical way to use icons in your Dear ImGui application.
-- A common pattern is to merge the icon font within your main font, so you can embed icons directly from your strings without having to change fonts back and forth.
-- To refer to the icon UTF-8 codepoints from your C++ code, you may use those headers files created by Juliette Foucaut:
-  https://github.com/juliettef/IconFontCppHeaders
+Using an icon font (such as [FontAwesome](http://fontawesome.io) or [OpenFontIcons](https://github.com/traverseda/OpenFontIcons)) is an easy and practical way to use icons in your Dear ImGui application.
+A common pattern is to merge the icon font within your main font, so you can embed icons directly from your strings without having to change fonts back and forth.
 
-**The C++11 version of those files uses the u8"" UTF-8 encoding syntax:**
-
-  ` #define ICON_FA_SEARCH  u8"\uf002" `
-
-**The pre-C++11 version has the values manually encoded as UTF-8:**
-
-  ` #define ICON_FA_SEARCH  "\xEF\x80\x82" `
+To refer to the icon UTF-8 codepoints from your C++ code, you may use those headers files created by Juliette Foucaut: https://github.com/juliettef/IconFontCppHeaders. Those files are full of line such as:
+  `#define ICON_FA_SEARCH  "\xEF\x80\x82"`
+  
+So you can use `ICON_FA_SEARCH` as a string that will render as a "Search" icon.
 
 Example Setup:
 ```cpp
-  // Merge icons into default tool font
-  #include "IconsFontAwesome.h"
-  ImGuiIO& io = ImGui::GetIO();
-  io.Fonts->AddFontDefault();
+// Merge icons into default tool font
+#include "IconsFontAwesome.h"
+ImGuiIO& io = ImGui::GetIO();
+io.Fonts->AddFontDefault();
 
-  ImFontConfig config;
-  config.MergeMode = true;
-  config.GlyphMinAdvanceX = 13.0f; // Use if you want to make the icon monospaced
-  static const ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
-  io.Fonts->AddFontFromFileTTF("fonts/fontawesome-webfont.ttf", 13.0f, &config, icon_ranges);
+ImFontConfig config;
+config.MergeMode = true;
+config.GlyphMinAdvanceX = 13.0f; // Use if you want to make the icon monospaced
+static const ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
+io.Fonts->AddFontFromFileTTF("fonts/fontawesome-webfont.ttf", 13.0f, &config, icon_ranges);
 ```
 Example Usage:
 ```cpp
-  // Usage, e.g.
-  ImGui::Text("%s among %d items", ICON_FA_SEARCH, count);
-  ImGui::Button(ICON_FA_SEARCH " Search");
-  // C string _literals_ can be concatenated at compilation time, e.g. "hello" " world"
-  // ICON_FA_SEARCH is defined as a string literal so this is the same as "A" "B" becoming "AB"
+// Usage, e.g.
+ImGui::Text("%s among %d items", ICON_FA_SEARCH, count);
+ImGui::Button(ICON_FA_SEARCH " Search");
+// C string _literals_ can be concatenated at compilation time, e.g. "hello" " world"
+// ICON_FA_SEARCH is defined as a string literal so this is the same as "A" "B" becoming "AB"
 ```
 See Links below for other icons fonts and related tools.
 
@@ -163,10 +160,10 @@ See Links below for other icons fonts and related tools.
  ## Using the FreeType Rasterizer
 
 - Dear ImGui uses imstb\_truetype.h to rasterize fonts (with optional oversampling). This technique and its implementation are not ideal for fonts rendered at small sizes, which may appear a little blurry or hard to read.
-- There is an implementation of the ImFontAtlas builder using FreeType that you can use in the misc/freetype/ folder.
+- There is an implementation of the ImFontAtlas builder using FreeType that you can use in the [misc/freetype/](https://github.com/ocornut/imgui/tree/master/misc/freetype) folder.
 - FreeType supports auto-hinting which tends to improve the readability of small fonts.
 
-**Note** 
+Note:
 - This code currently creates textures that are unoptimally too large (could be fixed with some work).
 - Also note that correct sRGB space blending will have an important effect on your font rendering quality.
 
@@ -174,17 +171,17 @@ See Links below for other icons fonts and related tools.
 ---------------------------------------
  ## Building Custom Glyph Ranges
 
-You can use the ImFontGlyphRangesBuilder helper to create glyph ranges based on text input. For example: for a game where your script is known, if you can feed your entire script to it and only build the characters the game needs.
+You can use the `ImFontGlyphRangesBuilder` helper to create glyph ranges based on text input. For example: for a game where your script is known, if you can feed your entire script to it and only build the characters the game needs.
 ```cpp
-  ImVector<ImWchar> ranges;
-  ImFontGlyphRangesBuilder builder;
-  builder.AddText("Hello world");                        // Add a string (here "Hello world" contains 7 unique characters)
-  builder.AddChar(0x7262);                               // Add a specific character
-  builder.AddRanges(io.Fonts->GetGlyphRangesJapanese()); // Add one of the default ranges
-  builder.BuildRanges(&ranges);                          // Build the final result (ordered ranges with all the unique characters submitted)
+ImVector<ImWchar> ranges;
+ImFontGlyphRangesBuilder builder;
+builder.AddText("Hello world");                        // Add a string (here "Hello world" contains 7 unique characters)
+builder.AddChar(0x7262);                               // Add a specific character
+builder.AddRanges(io.Fonts->GetGlyphRangesJapanese()); // Add one of the default ranges
+builder.BuildRanges(&ranges);                          // Build the final result (ordered ranges with all the unique characters submitted)
 
-  io.Fonts->AddFontFromFileTTF("myfontfile.ttf", size_in_pixels, NULL, ranges.Data);
-  io.Fonts->Build();                                     // Build the atlas while 'ranges' is still in scope and not deleted.
+io.Fonts->AddFontFromFileTTF("myfontfile.ttf", size_in_pixels, NULL, ranges.Data);
+io.Fonts->Build();                                     // Build the atlas while 'ranges' is still in scope and not deleted.
 ```
 
 ---------------------------------------
@@ -197,34 +194,34 @@ You can use the ImFontGlyphRangesBuilder helper to create glyph ranges based on 
 
 #### Pseudo-code:
 ```cpp
-  // Add font, then register two custom 13x13 rectangles mapped to glyph 'a' and 'b' of this font
-  ImFont* font = io.Fonts->AddFontDefault();
-  int rect_ids[2];
-  rect_ids[0] = io.Fonts->AddCustomRectFontGlyph(font, 'a', 13, 13, 13+1);
-  rect_ids[1] = io.Fonts->AddCustomRectFontGlyph(font, 'b', 13, 13, 13+1);
+// Add font, then register two custom 13x13 rectangles mapped to glyph 'a' and 'b' of this font
+ImFont* font = io.Fonts->AddFontDefault();
+int rect_ids[2];
+rect_ids[0] = io.Fonts->AddCustomRectFontGlyph(font, 'a', 13, 13, 13+1);
+rect_ids[1] = io.Fonts->AddCustomRectFontGlyph(font, 'b', 13, 13, 13+1);
 
-  // Build atlas
-  io.Fonts->Build();
+// Build atlas
+io.Fonts->Build();
 
-  // Retrieve texture in RGBA format
-  unsigned char* tex_pixels = NULL;
-  int tex_width, tex_height;
-  io.Fonts->GetTexDataAsRGBA32(&tex_pixels, &tex_width, &tex_height);
+// Retrieve texture in RGBA format
+unsigned char* tex_pixels = NULL;
+int tex_width, tex_height;
+io.Fonts->GetTexDataAsRGBA32(&tex_pixels, &tex_width, &tex_height);
 
-  for (int rect_n = 0; rect_n < IM_ARRAYSIZE(rect_ids); rect_n++)
-  {
-      int rect_id = rects_ids[rect_n];
-      if (const ImFontAtlas::CustomRect* rect = io.Fonts->GetCustomRectByIndex(rect_id))
-      {
-          // Fill the custom rectangle with red pixels (in reality you would draw/copy your bitmap data here!)
-          for (int y = 0; y < rect->Height; y++)
-          {
-              ImU32* p = (ImU32*)tex_pixels + (rect->Y + y) * tex_width + (rect->X);
-              for (int x = rect->Width; x > 0; x--)
-                  *p++ = IM_COL32(255, 0, 0, 255);
-          }
-      }
-  }
+for (int rect_n = 0; rect_n < IM_ARRAYSIZE(rect_ids); rect_n++)
+{
+    int rect_id = rects_ids[rect_n];
+    if (const ImFontAtlas::CustomRect* rect = io.Fonts->GetCustomRectByIndex(rect_id))
+    {
+        // Fill the custom rectangle with red pixels (in reality you would draw/copy your bitmap data here!)
+        for (int y = 0; y < rect->Height; y++)
+        {
+            ImU32* p = (ImU32*)tex_pixels + (rect->Y + y) * tex_width + (rect->X);
+            for (int x = rect->Width; x > 0; x--)
+                *p++ = IM_COL32(255, 0, 0, 255);
+        }
+    }
+}
 ```
 
 ---------------------------------------
@@ -236,37 +233,38 @@ You can use the ImFontGlyphRangesBuilder helper to create glyph ranges based on 
 - The tool can optionally output Base85 encoding to reduce the size of _source code_ but the read-only arrays in the actual binary will be about 20% bigger.
 
 Then load the font with:
- ` ImFont* font = io.Fonts->AddFontFromMemoryCompressedTTF(compressed_data, compressed_data_size, size_pixels, ...);`
+```cpp
+ImFont* font = io.Fonts->AddFontFromMemoryCompressedTTF(compressed_data, compressed_data_size, size_pixels, ...);
+```
 or
-  `ImFont* font = io.Fonts- AddFontFromMemoryCompressedBase85TTF(compressed_data_base85, size_pixels, ...);`
+```cpp
+ImFont* font = io.Fonts- AddFontFromMemoryCompressedBase85TTF(compressed_data_base85, size_pixels, ...);
+```
 
 
 ---------------------------------------
  ## Credits/Licenses For Fonts Included In Repository
 
-Some fonts files are available in the `misc/fonts/` folder.
+Some fonts files are available in the `misc/fonts/` folder:
 
+```
 Roboto-Medium.ttf
-
   Apache License 2.0
-  by Christian Robertson
+  by Christian Robetson
   https://fonts.google.com/specimen/Roboto
 
 Cousine-Regular.ttf
-
   by Steve Matteson
   Digitized data copyright (c) 2010 Google Corporation.
   Licensed under the SIL Open Font License, Version 1.1
   https://fonts.google.com/specimen/Cousine
 
 DroidSans.ttf
-
   Copyright (c) Steve Matteson
   Apache License, version 2.0
   https://www.fontsquirrel.com/fonts/droid-sans
 
 ProggyClean.ttf
-
   Copyright (c) 2004, 2005 Tristan Grimmer
   MIT License
   recommended loading setting: Size = 13.0, DisplayOffset.Y = +1
@@ -281,7 +279,7 @@ ProggyTiny.ttf
 Karla-Regular.ttf
   Copyright (c) 2012, Jonathan Pinhorn
   SIL OPEN FONT LICENSE Version 1.1
-
+```
 
 ---------------------------------------
  ## Font Links
